@@ -1,43 +1,43 @@
-extern crate clap;
-use clap::{App, Arg, SubCommand};
+extern crate structopt;
+
 use std::process;
+use structopt::StructOpt;
+
+#[derive(Debug, StructOpt)]
+#[structopt(name = env!("CARGO_PKG_NAME"), author = env!("CARGO_PKG_AUTHORS"), about = env!("CARGO_PKG_DESCRIPTION"))]
+enum Kvs {
+    #[structopt(name = "set", about = "Set the value of a string key to a string")]
+    Set {
+        #[structopt(name = "KEY", required = true, help = "KEY to set")]
+        key: String,
+        #[structopt(name = "VALUE", required = true, help = "VALUE to set")]
+        val: String,
+    },
+    #[structopt(name = "get", about = "Get the string value of a given string key")]
+    Get {
+        #[structopt(name = "KEY", required = true, help = "KEY to get")]
+        key: String,
+    },
+    #[structopt(name = "rm", about = "Remove a given string key")]
+    Remove {
+        #[structopt(name = "KEY", required = true, help = "KEY to remove")]
+        key: String,
+    },
+}
 
 fn main() {
-    let matches = App::new(env!("CARGO_PKG_NAME"))
-        .version(env!("CARGO_PKG_VERSION"))
-        .author(env!("CARGO_PKG_AUTHORS"))
-        .about(env!("CARGO_PKG_DESCRIPTION"))
-        .subcommand(
-            SubCommand::with_name("set")
-                .about("Set the value of a string key to a string")
-                .arg(Arg::with_name("KEY").help("KEY to set").required(true))
-                .arg(Arg::with_name("VALUE").help("VALUE to set").required(true)),
-        )
-        .subcommand(
-            SubCommand::with_name("get")
-                .about("Get the string value of a given string key")
-                .arg(Arg::with_name("KEY").help("KEY to get").required(true)),
-        )
-        .subcommand(
-            SubCommand::with_name("rm")
-                .about("Remove a given string key")
-                .arg(Arg::with_name("KEY").help("KEY to remove").required(true)),
-        )
-        .get_matches();
-
-    match matches.subcommand_name() {
-        Some("set") => {
-            eprintln!("unimplemented");
+    match Kvs::from_args() {
+        Kvs::Set { key, val } => {
+            eprintln!("set is unimplemented for key: {} val: {}", key, val);
             process::exit(1);
         }
-        Some("get") => {
-            eprintln!("unimplemented");
+        Kvs::Get { key } => {
+            eprintln!("get is unimplemented for key {}", key);
             process::exit(1);
         }
-        Some("rm") => {
-            eprintln!("unimplemented");
+        Kvs::Remove { key } => {
+            eprintln!("remove is unimplemented for key {}", key);
             process::exit(1);
         }
-        _ => unimplemented!(),
     }
 }
