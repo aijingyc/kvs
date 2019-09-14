@@ -1,6 +1,8 @@
 extern crate structopt;
 
-use std::process;
+use kvs::{KvStore, KvsError, Result};
+use std::env::current_dir;
+use std::process::exit;
 use structopt::StructOpt;
 
 #[derive(Debug, StructOpt)]
@@ -25,19 +27,31 @@ enum Kvs {
     },
 }
 
-fn main() {
+fn main() -> Result<()> {
     match Kvs::from_args() {
         Kvs::Set { key, val } => {
-            eprintln!("set is unimplemented for key: {} val: {}", key, val);
-            process::exit(1);
+            let mut store = KvStore::open(current_dir()?.as_path())?;
+            store.set(key, val)?;
         }
         Kvs::Get { key } => {
-            eprintln!("get is unimplemented for key {}", key);
-            process::exit(1);
+            let mut store = KvStore::open(current_dir()?.as_path())?;
+            if let Some(val) = store.get(key)? {
+                println!("{}", val);
+            } else {
+                println!("Key not found");
+            }
         }
         Kvs::Remove { key } => {
-            eprintln!("remove is unimplemented for key {}", key);
-            process::exit(1);
+            let mut store = KvStore::open(current_dir()?.as_path())?;
+            match store.remove(key) {
+                Ok(()) => {}
+                Err(KvsError::KeyNotFound) => {
+                    println!("Key not found");
+                    exit(1);
+                }
+                Err(e) => return Err(e),
+            }
         }
     }
+    Ok(())
 }
